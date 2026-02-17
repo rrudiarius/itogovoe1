@@ -20,42 +20,49 @@ func parsePackage(data string) (int, time.Duration, error) {
 	parseDate := strings.Split(data, ",")
 
 	if len(parseDate) != 2 {
-		return 0, 0, errors.New("invalid data format: expected 2 fields separated by comma")
+		return 0, 0, errors.New("Ошибка")
 	}
-
 	stepsStr := strings.TrimSpace(parseDate[0])
 	if stepsStr == "" {
-		return 0, 0, errors.New("steps field is empty")
+		return 0, 0, errors.New("Ошибка")
 	}
-
 	durationStr := strings.TrimSpace(parseDate[1])
 	if durationStr == "" {
-		return 0, 0, errors.New("duration field is empty")
+		return 0, 0, errors.New("Ошибка")
 	}
 
-	step, err := strconv.Atoi(stepsStr)
+	step, err := strconv.Atoi(parseDate[0])
 	if err != nil {
-		return 0, 0, fmt.Errorf("invalid steps value: %w", err)
+		return 0, 0, errors.New("Ошибка")
 	}
 	if step <= 0 {
-		return 0, 0, fmt.Errorf("steps must be positive, got: %d", step)
+		return 0, 0, errors.New("Ошибка")
 	}
 
-	duration, err := time.ParseDuration(durationStr)
+	duration, err := time.ParseDuration(parseDate[1])
 	if err != nil {
-		return 0, 0, fmt.Errorf("invalid duration format: %w", err)
+		return 0, 0, err
 	}
 	if duration <= 0 {
-		return 0, 0, fmt.Errorf("duration must be positive, got: %v", duration)
+		return 0, 0, errors.New("Ошибка")
 	}
-
 	return step, duration, nil
 }
 
 func DayActionInfo(data string, weight, height float64) string {
 	steps, duration, err := parsePackage(data)
 	if err != nil {
-		log.Printf("error parsing package: %v", err)
+		log.Println(err)
+		return ""
+	}
+
+	if steps <= 0 {
+		log.Println(err)
+		return ""
+	}
+
+	if duration <= 0 {
+		log.Println(err)
 		return ""
 	}
 
@@ -64,10 +71,9 @@ func DayActionInfo(data string, weight, height float64) string {
 
 	calories, err := spentcalories.WalkingSpentCalories(steps, weight, height, duration)
 	if err != nil {
-		log.Printf("error calculating calories: %v", err)
+		log.Println(err)
 		return ""
 	}
-
 	return fmt.Sprintf("Количество шагов: %d.\nДистанция составила %.2f км.\nВы сожгли %.2f ккал.\n",
 		steps, distanceKm, calories)
 }

@@ -19,47 +19,47 @@ const (
 func parseTraining(data string) (int, string, time.Duration, error) {
 	parseStr := strings.Split(data, ",")
 	if len(parseStr) != 3 {
-		return 0, "", 0, errors.New("invalid data format: expected 3 fields separated by comma")
+		return 0, "", 0, fmt.Errorf("Ошибка")
 	}
-
 	stepsStr := strings.TrimSpace(parseStr[0])
 	if stepsStr == "" {
-		return 0, "", 0, errors.New("steps field is empty")
+		return 0, "", 0, errors.New("Ошибка")
 	}
-
 	trainingTypeStr := strings.TrimSpace(parseStr[1])
 	if trainingTypeStr == "" {
-		return 0, "", 0, errors.New("training type field is empty")
+		return 0, "", 0, errors.New("Ошибка")
 	}
-
 	durationStr := strings.TrimSpace(parseStr[2])
 	if durationStr == "" {
-		return 0, "", 0, errors.New("duration field is empty")
+		return 0, "", 0, errors.New("Ошибка")
 	}
 
-	step, err := strconv.Atoi(stepsStr)
+	step, err := strconv.Atoi(parseStr[0])
 	if err != nil {
-		return 0, "", 0, fmt.Errorf("invalid steps value: %w", err)
+		return 0, "", 0, errors.New("Ошибка")
 	}
 
 	if step <= 0 {
-		return 0, "", 0, fmt.Errorf("steps must be positive, got: %d", step)
+		return 0, "", 0, errors.New("Ошибка")
 	}
 
-	duration, err := time.ParseDuration(durationStr)
+	duration, err := time.ParseDuration(parseStr[2])
 	if err != nil {
-		return 0, "", 0, fmt.Errorf("invalid duration format: %w", err)
+		return 0, "", 0, errors.New("Ошибка")
 	}
 
 	if duration <= 0 {
-		return 0, "", 0, fmt.Errorf("duration must be positive, got: %v", duration)
+		return 0, "", 0, errors.New("Ошибка")
 	}
 
-	return step, trainingTypeStr, duration, nil
+	return step, parseStr[1], duration, nil
 }
 
 func distance(steps int, height float64) float64 {
-	if steps <= 0 || height <= 0 {
+	if steps <= 0 {
+		return 0
+	}
+	if height <= 0 {
 		return 0
 	}
 	res := height * stepLengthCoefficient
@@ -69,7 +69,13 @@ func distance(steps int, height float64) float64 {
 }
 
 func meanSpeed(steps int, height float64, duration time.Duration) float64 {
-	if steps <= 0 || height <= 0 || duration <= 0 {
+	if steps <= 0 {
+		return 0
+	}
+	if height <= 0 {
+		return 0
+	}
+	if duration <= 0 {
 		return 0
 	}
 	res := distance(steps, height)
@@ -79,9 +85,18 @@ func meanSpeed(steps int, height float64, duration time.Duration) float64 {
 
 func TrainingInfo(data string, weight, height float64) (string, error) {
 	steps, trainingType, duration, err := parseTraining(data)
+
 	if err != nil {
-		log.Printf("error parsing training data: %v", err)
-		return "", err
+		log.Println(err)
+	}
+	if steps <= 0 {
+		log.Println(err)
+	}
+	if len(trainingType) <= 0 {
+		log.Println(err)
+	}
+	if duration <= 0 {
+		log.Println(err)
 	}
 
 	switch trainingType {
@@ -108,16 +123,16 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 
 func RunningSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
 	if steps <= 0 {
-		return 0, fmt.Errorf("invalid steps count: %d", steps)
+		return 0, fmt.Errorf("не удалось определить колличество шагов %d", steps)
 	}
 	if height <= 0 {
-		return 0, fmt.Errorf("invalid height: %.2f", height)
+		return 0, fmt.Errorf("не удалось определить рост %.2f", height)
 	}
 	if weight <= 0 {
-		return 0, fmt.Errorf("invalid weight: %.2f", weight)
+		return 0, fmt.Errorf("не удалось определить вес %.2f", weight)
 	}
 	if duration <= 0 {
-		return 0, fmt.Errorf("invalid duration: %v", duration)
+		return 0, fmt.Errorf("не удалось определить продолжительность %d", duration)
 	}
 
 	averageSpeed := meanSpeed(steps, height, duration)
@@ -129,16 +144,16 @@ func RunningSpentCalories(steps int, weight, height float64, duration time.Durat
 
 func WalkingSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
 	if steps <= 0 {
-		return 0, fmt.Errorf("invalid steps count: %d", steps)
+		return 0, fmt.Errorf("не удалось определить колличество шагов %d", steps)
 	}
 	if height <= 0 {
-		return 0, fmt.Errorf("invalid height: %.2f", height)
+		return 0, fmt.Errorf("не удалось определить рост %.2f", height)
 	}
 	if weight <= 0 {
-		return 0, fmt.Errorf("invalid weight: %.2f", weight)
+		return 0, fmt.Errorf("не удалось определить вес %.2f", weight)
 	}
 	if duration <= 0 {
-		return 0, fmt.Errorf("invalid duration: %v", duration)
+		return 0, fmt.Errorf("не удалось определить продолжительность %d", duration)
 	}
 
 	averageSpeed := meanSpeed(steps, height, duration)
