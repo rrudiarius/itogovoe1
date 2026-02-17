@@ -22,16 +22,18 @@ func parsePackage(data string) (int, time.Duration, error) {
 	if len(parseDate) != 2 {
 		return 0, 0, errors.New("invalid data format: expected 2 fields separated by comma")
 	}
+
 	stepsStr := strings.TrimSpace(parseDate[0])
 	if stepsStr == "" {
 		return 0, 0, errors.New("steps field is empty")
 	}
+
 	durationStr := strings.TrimSpace(parseDate[1])
 	if durationStr == "" {
 		return 0, 0, errors.New("duration field is empty")
 	}
 
-	step, err := strconv.Atoi(parseDate[0])
+	step, err := strconv.Atoi(stepsStr)
 	if err != nil {
 		return 0, 0, fmt.Errorf("invalid steps value: %w", err)
 	}
@@ -39,13 +41,14 @@ func parsePackage(data string) (int, time.Duration, error) {
 		return 0, 0, fmt.Errorf("steps must be positive, got: %d", step)
 	}
 
-	duration, err := time.ParseDuration(parseDate[1])
+	duration, err := time.ParseDuration(durationStr)
 	if err != nil {
 		return 0, 0, fmt.Errorf("invalid duration format: %w", err)
 	}
 	if duration <= 0 {
 		return 0, 0, fmt.Errorf("duration must be positive, got: %v", duration)
 	}
+
 	return step, duration, nil
 }
 
@@ -64,6 +67,7 @@ func DayActionInfo(data string, weight, height float64) string {
 		log.Printf("error calculating calories: %v", err)
 		return ""
 	}
+
 	return fmt.Sprintf("Количество шагов: %d.\nДистанция составила %.2f км.\nВы сожгли %.2f ккал.\n",
 		steps, distanceKm, calories)
 }

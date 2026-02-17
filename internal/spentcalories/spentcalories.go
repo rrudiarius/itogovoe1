@@ -21,14 +21,17 @@ func parseTraining(data string) (int, string, time.Duration, error) {
 	if len(parseStr) != 3 {
 		return 0, "", 0, errors.New("invalid data format: expected 3 fields separated by comma")
 	}
+
 	stepsStr := strings.TrimSpace(parseStr[0])
 	if stepsStr == "" {
 		return 0, "", 0, errors.New("steps field is empty")
 	}
+
 	trainingTypeStr := strings.TrimSpace(parseStr[1])
 	if trainingTypeStr == "" {
 		return 0, "", 0, errors.New("training type field is empty")
 	}
+
 	durationStr := strings.TrimSpace(parseStr[2])
 	if durationStr == "" {
 		return 0, "", 0, errors.New("duration field is empty")
@@ -56,10 +59,7 @@ func parseTraining(data string) (int, string, time.Duration, error) {
 }
 
 func distance(steps int, height float64) float64 {
-	if steps <= 0 {
-		return 0
-	}
-	if height <= 0 {
+	if steps <= 0 || height <= 0 {
 		return 0
 	}
 	res := height * stepLengthCoefficient
@@ -69,13 +69,7 @@ func distance(steps int, height float64) float64 {
 }
 
 func meanSpeed(steps int, height float64, duration time.Duration) float64 {
-	if steps <= 0 {
-		return 0
-	}
-	if height <= 0 {
-		return 0
-	}
-	if duration <= 0 {
+	if steps <= 0 || height <= 0 || duration <= 0 {
 		return 0
 	}
 	res := distance(steps, height)
@@ -108,7 +102,7 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 			"Тип тренировки: %s\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f\n",
 			trainingType, duration.Hours(), distance(steps, height), meanSpeed(steps, height, duration), cal), nil
 	default:
-		return "", errors.New("unknown training type")
+		return "", errors.New("неизвестный тип тренировки")
 	}
 }
 
